@@ -172,6 +172,30 @@ describe LetterOpener::DeliveryMethod do
     end
   end
 
+  context 'no attachments in plain text mail' do
+    before do
+      Mail.deliver do
+        from      'foo@example.com'
+        to        'bar@example.com'
+        subject   'With attachments'
+        text_part do
+          body 'This is <plain> text'
+        end
+        attachments = nil
+      end
+    end
+
+    it 'does not create attachments dir' do
+      attachment = Dir["#{location}/*/attachments/#{File.basename(__FILE__)}"].first
+      attachment.should be_nil
+    end
+
+    it 'saves attachment name' do
+      plain = File.read(Dir["#{location}/*/plain.html"].first)
+      plain.should_not include(File.basename(__FILE__))
+    end
+  end
+
   context 'attachments in plain text mail' do
     before do
       Mail.deliver do
